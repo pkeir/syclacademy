@@ -59,12 +59,12 @@
 				<section class="hbox" data-markdown>
 					## Learning Objectives
 
-					* Learn about the SYCL execution model
-					* Learn about the SIMT model for describing parallelism
-					* Learn how to define and invoke SYCL kernel functions
-					* Learn about the rules and restrictions on kernel functions
-					* Learn how to use both lambdas and function objects
-					* Learn how to manually compile a kernel function
+					* The SYCL execution model
+					* The SIMT model for describing parallelism
+					* Define and invoke SYCL kernel functions
+					* Rules and restrictions on kernel functions
+					* Using both lambdas and function objects
+					* Manual compilation of kernel functions
 				</section>
 				<!--Slide 3-->
 				<section class="hbox" data-markdown>
@@ -197,7 +197,7 @@
 				</section>
 				<!--Slide 13-->
 				<section class="hbox" data-markdown>
-					## SYCL is an SIMT Progamming Model
+					## SYCL is a SIMT Programming Model
 				</section>
 				<!--Slide 14-->
 				<section>
@@ -251,15 +251,15 @@ using namespace cl::sycl;
 class add;
 
 int main(int argc, char *argv[]) { 
-  queue gpuQueue(gpu_selector{});
+  queue q(gpu_selector{});
 
-  gpuQueue.submit([&](handler &cgh){
+  q.submit([&](handler &cgh){
 
     cgh.parallel_for&ltadd&gt(range&lt1&gt(1024), 
       [=](id&lt1&gt i) { 
       // kernel code }); 
   }); 
-  gpuQueue.wait();
+  q.wait();
 }
 
 							</code></pre>
@@ -282,15 +282,15 @@ using namespace cl::sycl;
 class add;
 
 int main(int argc, char *argv[]) { 
-  queue gpuQueue(gpu_selector{});
+  queue q(gpu_selector{});
 
-  gpuQueue.submit([&](handler &cgh){
+  q.submit([&](handler &cgh){
 
     cgh.parallel_for&ltadd&gt(range&lt1&gt(1024), 
       <mark>[=](id&lt1&gt i) { 
       // kernel code }); 
   }); </mark>
-  gpuQueue.wait();
+  q.wait();
 }
 
 							</code></pre>
@@ -312,15 +312,15 @@ using namespace cl::sycl;
 class add;
 
 int main(int argc, char *argv[]) { 
-  queue gpuQueue(gpu_selector{});
+  queue q(gpu_selector{});
 
-  gpuQueue.submit([&](handler &cgh){
+  q.submit([&](handler &cgh){
 
     cgh.parallel_for&ltadd&gt(<mark>range&lt1&gt(1024), 
       [=](id&lt1&gt i</mark>) { 
       // kernel code }); 
   }); 
-  gpuQueue.wait();
+  q.wait();
 }
 							</code></pre>
 						</div>
@@ -497,12 +497,12 @@ class add;
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, 
+    queue q(gpu_selector{}, 
       async_handler{});
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -511,7 +511,7 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for&ltadd&gt(range&lt1&gt(dA.size()),
         <mark>[=](id&lt1&gt i){ out[i] = inA[i] + inB[i]; }</mark>);
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -563,12 +563,12 @@ class add;
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, 
+    queue q(gpu_selector{}, 
       async_handler{});
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -577,7 +577,7 @@ int main(int argc, char *argv[]) {
       <mark>cgh.parallel_for(range&lt1&gt(dA.size()), 
         add{inA, inB, out});</mark>
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -625,12 +625,12 @@ class add;
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, 
+    queue q(gpu_selector{}, 
       async_handler{});
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -639,7 +639,7 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for(range&lt1&gt(dA.size()), 
         add{inA, inB, out});
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -660,15 +660,15 @@ int main(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, 
+    queue q(gpu_selector{}, 
       async_handler{});
 
-    <mark>program addProgram(gpuQueue.get_context());</mark>
+    <mark>program addProgram(q.get_context());</mark>
 
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -677,7 +677,7 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for(range&lt1&gt(dA.size()), 
         add{inA, inB, out});
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -696,16 +696,16 @@ int main(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, 
+    queue q(gpu_selector{}, 
       async_handler{});
 
-    program addProgram(gpuQueue.get_context());
+    program addProgram(q.get_context());
     <mark>addProgram.build_with_kernel_type&ltadd&gt();</mark>
 
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -714,7 +714,7 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for(range&lt1&gt(dA.size()), 
         add{inA, inB, out});
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -733,16 +733,16 @@ int main(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try { 
-    queue gpuQueue(gpu_selector{}, async_handler{});
+    queue q(gpu_selector{}, async_handler{});
 
-    program addProgram(gpuQueue.get_context());
+    program addProgram(q.get_context());
     addProgram.build_with_kernel_type&ltadd&gt();
     <mark>auto addKernel = addProgram.get_kernel&ltadd&gt();</mark>
 
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&gtfloat, 1&lt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -751,7 +751,7 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for(range&lt1&gt(dA.size()), 
 	    add{inA, inB, out});
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
@@ -771,16 +771,16 @@ int main(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
   try{
-    queue gpuQueue(gpu_selector{}, async_handler{});
+    queue q(gpu_selector{}, async_handler{});
 
-    program addProgram(gpuQueue.get_context());
+    program addProgram(q.get_context());
     addProgram.build_with_kernel_type&ltadd&gt();
     auto addKernel = addProgram.get_kernel&ltadd&gt();
 
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
@@ -790,7 +790,7 @@ int main(int argc, char *argv[]) {
        range&lt1&gt(dA.size()), [=](id&lt1&gt i)
        { out[i] = inA[i] + inB[i]; }); 
     }); 
-    gpuQueue.wait_and_throw();
+    q.wait_and_throw();
   } catch (...) { /* handle errors */ }
 }
 							</code></pre>
