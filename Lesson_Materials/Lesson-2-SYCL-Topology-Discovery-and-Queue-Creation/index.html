@@ -61,11 +61,11 @@
 				<section class="hbox" data-markdown>
 					## Learning Objectives
 					
-					* Learn about the SYCL system topology and how to traverse it
-					* Learn how to query information about a platform or device
-					* Learn how to select a device; both manually and using device selectors
-					* Learn how to configure a queue
-					* Learn about the SYCL scheduler and how to enqueue work
+					* SYCL system topology and how to traverse it
+					* Querying information about a platform or device
+					* Device selection: manual and using device selectors
+					* Queue configuration
+					* The SYCL scheduler and how to enqueue work
                 </section>
 				<!--Slide 3-->
 				<section class="hbox" data-markdown>
@@ -123,7 +123,7 @@
 					<div class="hbox" data-markdown>
 						* In SYCL there are two ways to query a system’s topology 
 						  * The topology can be manually queried and iterated over via APIs of the platform and device classes 
-						  * The topology can be automatically queried and iterated over using a use  specified heuristic by a device selector object
+						  * The topology can be automatically queried and iterated over by a user-specified heuristic via a device selector object
 					</div>
                 </section>
 				<!--Slide 9-->
@@ -145,7 +145,7 @@ auto platforms = platform::get_platforms();
 					</div>
 					<div class="smaller-size-font" data-markdown>
 							* The platform class provides the static function **get_platforms**
-							  * It retrieves a vector of all available platforms in the system
+							  * Returns a **std::vector** of all available platforms in the system
 							* This includes the host platform
 					</div>
 				</section>
@@ -164,7 +164,7 @@ auto intelDevices = intelPlatform.get_devices();
 					</div>
 					<div class="smaller-size-font" data-markdown>
 							* The platform class provides the member function **get_devices** that
-							  * It returns a vector of all devices associated with that platform
+							  * Returns a **std::vector** of all devices associated with that platform
 							* This includes the host device if the platform object represents a host platform
 					</div>
 				</section>
@@ -183,7 +183,7 @@ auto devices = device::get_devices();
 					</div>
 					<div class="smaller-size-font" data-markdown>
 							* The device class also provides the static function **get_devices** 
-							  * It retrieves a vector of all available devices in the system
+							  * Returns a **std::vector** of all available devices in the system
 							* This includes the host device
 					</div>
 				</section>
@@ -239,7 +239,7 @@ auto chosenDevice = defSelector.select_device();
 					</div>
 					<div class="container" data-markdown>
 							* The **default_selector** is a standard device selector type
-							  * Chooses a device based on an implementation defined heuristic
+							* Chooses a device based on an implementation defined heuristic
 					</div>
 				</section>
 				<!--Slide 17-->
@@ -345,7 +345,8 @@ int main(int argc, char *argv[]) {
 						<div class="col-left-1">
 							<code><pre>
 auto plt = dev.get_platform();
-auto platformName = dev.get_info&ltinfo::device::name&gt();
+auto platformName = plt.get_info&ltinfo::platform::name&gt();
+auto devName = dev.get_info&ltinfo::device::name&gt();
 
 							</code></pre>
 						</div>
@@ -487,7 +488,7 @@ int main(int argc, char *argv[]) {
 							</code></pre>
 						</div>
 						<div class="col-right-1" data-markdown>
-							* The **submit** member function takes a C++ function object, which takes a reference to a **handler** object
+							* The **submit** member function takes a function object, which takes a reference to a **handler** object
 							* The function object can be a lambda or a class with a function call operator
 							* The body of the function object represents the command group that is being submitted
 							* The handler object is created by the SYCL runtime and is used to link commands and requirements declared inside the command group
@@ -546,6 +547,10 @@ int main(int argc, char *argv[]) {
 							* But it's often useful to be able to explicitly wait on a queue to complete any outstanding work
 						</div>
 					</div>
+				</section>
+				<!--Slide 36-->
+				<section data-markdown>
+					## Questions
 				</section>
 			</div>
 		</div>
