@@ -58,8 +58,8 @@
 				<!--Slide 2-->
 				<section class="hbox" data-markdown>
 					## Learning Objectives
-					* Learn about how the SYCL runtime orders execution using data dependencies
-					* Learn about how SYCL synchronizes data
+					* How the SYCL runtime orders execution using data dependencies
+					* SYCL data synchronisation
 				</section>
 				<!--Slide 3-->
 				<section>
@@ -104,7 +104,7 @@ cpuQueue.wait_and_throw();
 						</div>
 					</div>
 					<div class="smaller-size-font" data-markdown>
-							* To use a C++ function object you simply construct an instance of the type initializing the accessors and pass it to parallel_for
+							* To use a C++ function object on a CPU queue you simply construct an instance of the type initializing the accessors and pass it to **parallel_for**
 							* Notice you no longer need to name the SYCL kernel
 					</div>
 				</section>
@@ -186,7 +186,7 @@ cpuQueue.wait_and_throw();
 						</div>
 					</div>
 					<div class="smaller-size-font" data-markdown>
-							The third command group has data dependencies on the previous, the first two command groups run concurrently
+							In this example, the third command group has data dependencies on the previous; so the first two command groups can run concurrently
 					</div>
 				</section>
 				<!--Slide 8-->
@@ -249,7 +249,7 @@ cpuQueue.wait_and_throw();
 queue cpuQueue(cpu_selector{}, async_handler{});
 cpuQueue.submit([&](handler &cgh){ // Copy A 
   auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh); 
-  cgh.copy(data, ptr); });
+  cgh.copy(data_a, ptr); });
 
 cpuQueue.submit([&](handler &cgh){ // Compute A
   auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh); 
@@ -258,11 +258,11 @@ cpuQueue.submit([&](handler &cgh){ // Compute A
 
 cpuQueue.submit([&](handler &cgh){ // Copy B
   auto ptr = <mark>bufB</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh); 
-  cgh.copy(data, ptr); });
+  cgh.copy(data_b, ptr); });
 
 cpuQueue.submit([&](handler &cgh){ // Compute B
   auto ptr = <mark>bufB</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh); 
-  cgh.parallel_for(range&lt1&gt(dA.size()), func(ptr)); });
+  cgh.parallel_for(range&lt1&gt(dB.size()), func(ptr)); });
 
 cpuQueue.wait_and_throw();
 							</code></pre>
@@ -307,19 +307,19 @@ cpuQueue.wait_and_throw();
 							<code><pre>
 queue cpuQueue(cpu_selector{}, async_handler{});
 cpuQueue.submit([&](handler &cgh){ // Copy first half
-  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh, halfSize, origin);
+  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh, halfSize);
   cgh.copy(data, ptr);
 
 cpuQueue.submit([&](handler &cgh){ // Compute first half
-  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh, halfSize, origin);
+  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh, halfSize);
   cgh.parallel_for(range&lt1&gt(dA.size()), func(ptr)); });
 
 cpuQueue.submit([&](handler &cgh){ // Copy second half
-  auto ptr = <mark>bufB</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh); 
-  cgh.copy(data, ptr);});
+  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read</mark>&gt(cgh, halfSize, offset); 
+  cgh.copy(data + offset, ptr);});
   
 cpuQueue.submit([&](handler &cgh){ // Compute second half
-  auto ptr = <mark>bufB</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh, halfSize, origin);
+  auto ptr = <mark>bufA</mark>.get_access&lt<mark>access::mode::read_write</mark>&gt(cgh, halfSize, offset);
   cgh.parallel_for(range&lt1&gt(dA.size()), func(ptr)); });
   
 cpuQueue.wait_and_throw();
@@ -331,7 +331,7 @@ cpuQueue.wait_and_throw();
 						</div>
 					</div>
 					<div class="smaller-size-font" data-markdown>
-						The first copy and compute operate on the first half of the buffer and the other copy and compute operate on the second half
+						The first copy and compute operate on the first half of the buffer; the other copy and compute operate on the second half
 					</div>
 				</section>
 				<!--Slide 16-->
@@ -348,6 +348,10 @@ cpuQueue.wait_and_throw();
 					<div class="smaller-size-font" data-markdown>
 						![Command Group Workflow](../common-revealjs/images/cg-workflow-4.png "Command Group Workflow")
 					</div>
+				</section>
+				<!--Slide 16-->
+				<section data-markdown>
+					## Questions
 				</section>
 			</div>
 		</div>
