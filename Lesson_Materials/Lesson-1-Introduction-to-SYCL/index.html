@@ -60,11 +60,11 @@
 				<!--Slide 2-->
 				<section class="hbox" data-markdown>
 					## Learning Objectives
-					* Learn about the SYCL 1.2.1 specification and it's implementations
-					* Learn about the major features that SYCL provides
-					* Learn about the components of a SYCL implementation
-					* Learn about the anatomy of a typical SYCL application
-					* Learn where to find useful resources for SYCL
+					* The SYCL 1.2.1 spec. and its implementations
+					* The major features that SYCL provides
+					* The components of a SYCL implementation
+					* The anatomy of a typical SYCL application
+					* Where to find useful resources for SYCL
                 </section>
 				<!--Slide 3-->
 				<section class="hbox" data-markdown>
@@ -114,7 +114,7 @@
 					<article class="main" data-markdown>
 						*  SYCL provides high-level abstractions over common boilerplate code 
 						  * Platform/device selection
-						  * Buffer creation
+						  * Device memory allocation
 						  * Kernel compilation
 						  * Dependency management and scheduling
 					</article>
@@ -157,7 +157,7 @@
 							* SYCL can target any device supported by its back-end
 							* SYCL can target a number of different backends
 							
-							While the current specification is limited to OpenCL, some implementations are already supporting other non-OpenCL back-ends.
+							While the current specification is limited to OpenCL, some implementations are already supporting non-OpenCL back-ends
 						</div>
 					</div>
 					<aside class="notes">
@@ -188,8 +188,8 @@
 						</div>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-						* The host is generally the CPU and is used to dispatch the parallel execution of kernels
-						* The device is the parallel unit used to execute the kernels, such as a GPU
+						* The host generally runs on the CPU to manage the parallel execution of kernels
+						* The device is the parallel unit used to execute the kernels, such as a GPU or multicore CPU
 					</div>
 				</section>
 				<!--Slide 12-->
@@ -210,8 +210,8 @@
 							![SYCL Host Device](../common-revealjs/images/sycl_implementation_host_device.png "SYCL-Host-Device")
 						</div>
 						<div class="col" data-markdown>
-							* The host device is an emulated backend that is executed as native C++ code and emulates the SYCL execution and memory model 
-							* The host device can be used to execute kernels without backend drivers and for debugging purposes
+							* The host device is an emulated backend that is executed as native C++ code, and emulates the SYCL execution and memory model 
+							* The host device can be used to execute kernels without backend drivers and for debugging purposes (unlike CUDA)
 						</div>
 				</section>
 				<!--Slide 14-->
@@ -221,7 +221,7 @@
 							![SYCL Backend](../common-revealjs/images/sycl_implementation_backend_interface.png "SYCL-Backend")
 						</div>
 						<div class="col" data-markdown>
-							* The back-end interface is where the SYCL runtime calls down into a back-end in order to execute on a particular device  
+							* The back-end interface is where the SYCL runtime calls down into a back-end in order to execute on a specific device  
 							* The standard back-end is OpenCL but some implementations support other interfaces
 						</div>
 					</div>
@@ -233,8 +233,8 @@
 							![SYCL Compiler](../common-revealjs/images/sycl_implementation_sycl_compiler.png "SYCL-Compiler")
 						</div>
 						<div class="col" data-markdown>
-							* The SYCL device compiler is a C++ compiler which can identify SYCL kernels and compile them down to an IR or ISA
-							  * This can be SPIR, SPIR-V, GCN, PTX or any proprietary vendor ISA
+							* The SYCL device compiler is a C++ compiler which can identify SYCL kernels and compile them an IR or ISA
+							  * This can be SPIR, SPIR-V, GCN, PTX or a proprietary vendor ISA
 						</div>
 					</div>
 					<div class="bottom-bullets" data-markdown>
@@ -279,7 +279,7 @@ using namespace cl::sycl;
 
 int main(int argc, char *argv[]) { 
 
-  <mark>queue gpuQueue{gpu_selector{}};</mark>
+  <mark>queue q{gpu_selector{}};</mark>
 
 }
 						</code></pre>
@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
 					<div class="container">
 						<div class="col-left" data-markdown>
 							* Device selectors allow you to choose a device based on a custom configuration
-							* The queue default constructor uses a the default_selector, which allows the runtime to select a device for you
+							* The queue default constructor uses the **default_selector**, which allows the runtime to select a device for you
 						</div>
 						<div class="col-right" data-markdown>
 							![SYCL Selector](../common-revealjs/images/sycl_code_selector.png "SYCL-Queues")
@@ -306,9 +306,9 @@ using namespace cl::sycl;
 
 int main(int argc, char *argv[]) { 
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
-  <mark>gpuQueue.submit([&](handler &cgh){ </mark>
+  <mark>q.submit([&](handler &cgh){ </mark>
 
   });
 }
@@ -339,9 +339,9 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   <mark>std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };</mark>
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
-  gpuQueue.submit([&](handler &cgh){
+  q.submit([&](handler &cgh){
 
   });
 }
@@ -364,13 +364,13 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … }; // psuedo code
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
   <mark>buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));</mark>
   <mark>buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));</mark>
   <mark>buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));</mark>
 
-  gpuQueue.submit([&](handler &cgh){
+  q.submit([&](handler &cgh){
 
   });
 }
@@ -393,14 +393,14 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   std::vector<float> dA{ … }, dB{ … }, dO{ … };
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
   <mark>{</mark>
     buffer<float, 1> bufA(dA.data(), range<1>(dA.size())); 
     buffer<float, 1> bufB(dB.data(), range<1>(dB.size())); 
     buffer<float, 1> bufO(dO.data(), range<1>(dO.size()));
 
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
     });
   <mark>}</mark>
@@ -408,8 +408,8 @@ int main(int argc, char *argv[]) {
 						</code></pre>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-					    Buffers synchronize on destruction via RAII
-						So adding this scope means that all kernels writing to the buffers will wait and the data will be copied back to the vectors on leaving this scope
+					  * Buffers synchronise on destruction via Resource Allocation is Initialisation (RAII)
+					  * Adding this scope means that all kernels writing to the buffers will wait and the data will be copied back to the vectors on leaving this scope
 					</div>
 				</section>
 				<!--Slide 23-->
@@ -425,27 +425,27 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   std::vector<float> dA{ … }, dB{ … }, dO{ … };
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
   {
     buffer<float, 1> bufA(dA.data(), range<1>(dA.size())); 
     buffer<float, 1> bufB(dB.data(), range<1>(dB.size())); 
     buffer<float, 1> bufO(dO.data(), range<1>(dO.size()));
 
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       <mark>auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);</mark>
       <mark>auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);</mark>
       <mark>auto out = bufO.get_access&ltaccess::mode::write&gt(cgh);</mark>
 
-	});
+    });
   }
 }
 						</code></pre>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-						We create an accessor for each of the buffers
-						Read access for the two input buffers and write access for the output buffer
+					  * We create an accessor for each of the buffers
+					  * Read access for the two input buffers and write access for the output buffer
 					</div>
 				</section>
 				<!--Slide 24-->
@@ -462,32 +462,33 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
   {
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
 
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access&ltaccess::mode::read&gt(cgh);
       auto inB = bufB.get_access&ltaccess::mode::read&gt(cgh);
       auto out = bufO.get_access&ltaccess::mode::write&gt(cgh);
 
-      <mark>cgh.parallel_for&ltadd&gt(range&lt1&gt(dA.size()),</mark>
-        <mark>[=](id&lt1&gt i){ out[i] = inA[i] + inB[i]; });</mark>
+      <mark>cgh.parallel_for&ltadd&gt(range&lt1&gt(dA.size()), [=](id&lt1&gt i){</mark>
+        <mark>out[i] = inA[i] + inB[i];</mark>
+      <mark>});</mark>
 
-	});
+    });
   }
 }
 						</code></pre>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-						* We define a SYCL kernel function for the command group using the parallel_for API
+						* We define a SYCL kernel function for the command group using the **parallel_for** API
 						* The first argument here is a range, specifying the iteration space
 						* The second argument is a lambda function that represents the entry point for the SYCL kernel
-						* This lambda takes an id parameter that describes the current iteration being executed
+						* This lambda takes an *id* parameter that describes the current iteration being executed
 					</div>
 				</section>
 				<!--Slide 25-->
@@ -504,21 +505,22 @@ using namespace cl::sycl;
 int main(int argc, char *argv[]) { 
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
 
-  queue gpuQueue{gpu_selector{}};
+  queue q{gpu_selector{}};
 
   {
     buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
     buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
     buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
 
-    gpuQueue.submit([&](handler &cgh){
+    q.submit([&](handler &cgh){
 
       auto inA = bufA.get_access<access::mode::read>(cgh);
       auto inB = bufB.get_access<access::mode::read>(cgh);
       auto out = bufO.get_access<access::mode::write>(cgh);
 
-      cgh.parallel_for<mark>&ltadd&gt</mark>(range&lt1&gt(dA.size()),
-        [=](id&lt1&gt i){ out[i] = inA[i] + inB[i]; });
+      cgh.parallel_for<mark>&ltadd&gt</mark>(range&lt1&gt(dA.size()), [=](id&lt1&gt i){
+        out[i] = inA[i] + inB[i];
+      });
 
     });
   }
@@ -526,7 +528,7 @@ int main(int argc, char *argv[]) {
 						</code></pre>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-						* The template parameter to parallel_for is used to name the lambda
+						* The template parameter to **parallel_for** is used to name the lambda
 						* The reason for this is that C++ does not have a standard ABI for lambdas so they are represented differently across the host and device compiler
 						* SYCL kernel functions follow C++ ODR rules, which means that if a SYCL kernel is in a template context, the kernel name needs to reflect that context, so must contain the same template arguments
 					</div>
@@ -545,34 +547,35 @@ class add;
 int main(int argc, char *argv[]) { 
   std::vector&ltfloat&gt dA{ … }, dB{ … }, dO{ … };
 
-  <mark>try{</mark>
-    queue gpuQueue{gpu_selector{}, <mark>async_handler{}</mark>};
+  <mark>try {</mark>
+    queue q{gpu_selector{}, <mark>async_handler{}</mark>};
 
 	{
       buffer&ltfloat, 1&gt bufA(dA.data(), range&lt1&gt(dA.size()));
       buffer&ltfloat, 1&gt bufB(dB.data(), range&lt1&gt(dB.size()));
       buffer&ltfloat, 1&gt bufO(dO.data(), range&lt1&gt(dO.size()));
 
-      gpuQueue.submit([&](handler &cgh){
+      q.submit([&](handler &cgh){
 
         auto inA = bufA.get_access<access::mode::read>(cgh);
         auto inB = bufB.get_access<access::mode::read>(cgh);
         auto out = bufO.get_access<access::mode::write>(cgh);
 
-        cgh.parallel_for&ltadd&gt(range&lt1&gt(dA.size()),
-          [=](id&lt1&gt i){ out[i] = inA[i] + inB[i]; });
+        cgh.parallel_for&ltadd&gt(range&lt1&gt(dA.size()), [=](id&lt1&gt i){
+          out[i] = inA[i] + inB[i];
+        });
 
       });
-      <mark>gpuQueue.wait_and_throw();</mark>
+      <mark>q.wait_and_throw();</mark>
     <mark>} catch (...) { /* handle errors */ }</mark>
   }
 }
 						</code></pre>
 					</div>
 					<div class="bottom-bullets" data-markdown>
-					    * In SYCL errors are handled using exception handling, so you should always wrap SYCL code in a try-catch block
-						* Some exceptions are thrown synchronously at the point of using a SYCL API
-						* Other exceptions are asynchronous and are stored by the runtime and passed to an **async handler** when the queue is told to throw
+            * In SYCL errors are handled using exception handling, so you should always wrap SYCL code in a try-catch block
+            * Some exceptions are thrown synchronously at the point of using a SYCL API
+            * Other exceptions are asynchronous and are stored by the runtime and passed to an **async_handler** when the queue is told to throw
 					</div>
 				</section>
 				<!--Slide 27-->
@@ -580,7 +583,7 @@ int main(int argc, char *argv[]) {
 					## Where to Get Started with SYCL
 					
 					* Visit https://www.khronos.org/sycl/ to find the latest SYCL specifications
-					* Checkout the documentation provided with one of the SYCL implementations.
+					* Checkout the documentation provided with one of the SYCL implementations
 					* Visit https://sycl.tech to find out about all the SYCL implementations, news and videos
 				</section>
 				<!--Slide 28-->
